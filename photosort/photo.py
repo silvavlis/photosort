@@ -6,8 +6,13 @@ __email__ = "miguelangel@ajo.es"
 __copyright__ = "Copyright (C) 2013 Miguel Angel Ajo Pelayo"
 __license__ = "GPLv3"
 
-from PIL import Image
-from PIL.ExifTags import TAGS
+try:
+    from PIL import Image
+    from PIL.ExifTags import TAGS
+    PIL_available = True
+except ImportError:
+    import exifread
+    PIL_available = False
 import datetime
 import sys
 import time
@@ -25,17 +30,26 @@ class Photo(media.MediaFile):
         """Returns a dictionary from the exif data of an
          PIL Image item. """
         self.__exif_data = {}
-        image = Image.open(self._filename)
-        try:
-            info = image._getexif()
-        except AttributeError:
-            return {}
+        # if PIL available
+        if PIL_available:
+            image = Image.open(self._filename)
+            try:
+                info = image._getexif()
+            except AttributeError:
+                return {}
 
 
-        if info:
-            for tag, value in info.items():
-                decoded = TAGS.get(tag, tag)
-                self.__exif_data[decoded] = value
+            if info:
+                for tag, value in info.items():
+                    decoded = TAGS.get(tag, tag)
+                    self.__exif_data[decoded] = value
+
+        else:
+            # if PIL not available, but exifread available
+            photo_file = open(self._filename, 'rb')
+            tags = exifread.process_file(photo_file)
+            for tag in tags.keys():
+                self._exif_data[tag] = tags[tag]
 
         return self.__exif_data
 
