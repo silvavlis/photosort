@@ -11,8 +11,12 @@ if sys.argv[-1] in supported_exif_readers:
 else:
     exif_reader = 'PIL'
 
+tool_name = 'photosort'
+if exif_reader != 'PIL':
+    tool_name = tool_name + '-' + exif_reader
+
 setuptools.setup(
-        name = 'photosort',
+        name = tool_name,
         version = '2014.1a',
         description = 'Picture inbox simplified',
         author = 'Miguel Angel Ajo Pelayo',
