@@ -33,30 +33,8 @@ class MovieWithMetadata(media.MediaFile):
             return False
 
         new_movie_filename = new_pack_path + os.path.splitext(self._filename)[1]
-        try:
-            logging.debug("Moving '%s' to '%s'" % (self._filename, new_movie_filename))
-            self.makedirs_f(os.path.dirname(new_movie_filename),file_mode)
-        except:
-            logging.error("Unable to move: %s" % new_movie_filename)
+        if not super(MovieWithMetadata, self).rename_as(new_movie_filename):
             return False
-
-        try:
-            result = shutil.move(self._filename, new_movie_filename)
-            os.chmod(new_movie_filename,file_mode)
-        except OSError as e:
-            logging.error("Unable to move: %s" % e)
-            return False
-
-        except IOError as e:
-            logging.error("Unable to move: %s" % e)
-            return False
-
-        except shutil.Error as e:
-            logging.error("Unable to move: %s" % e)
-            return False
-
-        except:
-            raise
 
         return True
 

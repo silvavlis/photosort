@@ -19,7 +19,7 @@ import glob
 KNOWN_BACKPACKED = {'movie_with_metadata':
                         ['movie', 'photo']}
 
-class MediaFile:
+class MediaFile(object):
 
     def __init__(self, filename):
         self._filename = filename
