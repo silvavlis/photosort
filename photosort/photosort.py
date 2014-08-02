@@ -36,6 +36,9 @@ class PhotoSort:
         walker = walk.WalkForMedia(src_dir)
         for file_dir,file_name in walker.find_media():
             file_path = os.path.join(file_dir,file_name)
+            #if file disappeared moved as backpack of another one, ignore it
+            if not os.path.exists(file_path):
+                continue
             media_file = media.MediaFile.build_for(file_path)
             if self._photodb.is_duplicate(media_file):
 		    file = media_file.get_filename()
