@@ -42,7 +42,12 @@ photosort depends on PIL and piyaml
 
 ## Configuration
 
-Configuration is stored in YAML format, this is an example file:
+Configuration is stored in YAML format
+
+Don't create the field 'file_prefix' if no change is desired in the filename 
+of the media items.
+
+This is an example file:
 
 ```
 sources:
@@ -55,6 +60,7 @@ sources:
 output:
   dir: '/mnt/nas/Pictures'
   pattern: "%(year)d/%(year)04d_%(month)02d_%(day)02d"
+  file_prefix: "%(year)d%(month)02d%(day)02d%(hour)d%(minute)d%(second)d_"
   duplicates_dir: 'duplicates'
   chmod: 0o774
   log_file: 'photosort.log'
