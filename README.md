@@ -59,7 +59,7 @@ sources:
 
 output:
   dir: '/mnt/nas/Pictures'
-  pattern: "%(year)d/%(year)04d_%(month)02d_%(day)02d"
+  dir_pattern: "%(year)d/%(year)04d_%(month)02d_%(day)02d"
   file_prefix: "%(year)d%(month)02d%(day)02d%(hour)d%(minute)d%(second)d_"
   duplicates_dir: 'duplicates'
   chmod: 0o774
