@@ -16,8 +16,11 @@ import datetime
 import shutil
 import glob
 
-KNOWN_BACKPACKED = {'movie_with_metadata':
-                        ['movie', 'photo']}
+KnownSidecar = {'movie_with_metadata':
+                        ['movie', 'photo'],
+                'raw_with_metadata':
+                        ['raw', 'photo']
+                }
 
 class MediaFile(object):
 
@@ -27,47 +30,52 @@ class MediaFile(object):
         self._hash = None
 
     @staticmethod
-    def _guess_backpacked_file(filename):
+    def _guess_sidecar_file(filename):
         media_group_files = glob.glob(os.path.splitext(filename)[0] + ".*")
         if len(media_group_files) < 2:
             return None
         elif len(media_group_files) == 2:
             logging.debug("Group of files found: %s" % str(media_group_files))
-            for backpacked_format in KNOWN_BACKPACKED.keys():
-                expected_files = list(KNOWN_BACKPACKED[backpacked_format])
+            for sidecar_format in KnownSidecar.keys():
+                expected_files = list(KnownSidecar[sidecar_format])
                 for index in [0, 1]:
                     file_type = MediaFile.guess_file_type(media_group_files[index])
                     if file_type in expected_files:
                         expected_files.remove(file_type)
                     else:
                         logging.debug("Files aren't '%s': %s" % 
-                                (backpacked_format, str(media_group_files)))
+                                (sidecar_format, str(media_group_files)))
                         break
                 if not expected_files:
                     logging.debug("%s: %s" % 
-                            (backpacked_format, str(media_group_files)))
-                    return backpacked_format
+                            (sidecar_format, str(media_group_files)))
+                    return sidecar_format
         else:
             logging.error("Ignoring group of files: %s" % str(media_group_files))
 
     @staticmethod
     def guess_file_type(filename):
         extension = filename.lower().split('.')[-1]
-        if extension in ('jpeg', 'jpg', 'cr2', 'raw', 'png', 'arw', 'thm'):
+        if extension in ('jpeg', 'jpg', 'png', 'thm'):
             return 'photo'
-        if extension in ('mpeg', 'mpg', 'mov', 'mp4', 'avi'):
+        elif extension in ('cr2', 'raw', 'arw'):
+            return 'raw'
+        elif extension in ('mpeg', 'mpg', 'mov', 'mp4', 'avi'):
             return 'movie'
         return 'unknown'
 
     @staticmethod
     def build_for(filename):
-        backpacked_type = MediaFile._guess_backpacked_file(filename)
-        if backpacked_type:
+        sidecar_type = MediaFile._guess_sidecar_file(filename)
+        if sidecar_type:
             logging.info("Backpacked file '%s': %s" % 
-                    (backpacked_type, os.path.splitext(filename)[0]))
-            if backpacked_type is 'movie_with_metadata':
+                    (sidecar_type, os.path.splitext(filename)[0]))
+            if sidecar_type is 'movie_with_metadata':
                 import movie_with_metadata    # delayed import to avoid circular dependencies
                 return movie_with_metadata.MovieWithMetadata(filename)
+            elif sidecar_type is 'raw_with_metadata':
+                import raw_with_metadata    # delayed import to avoid circular dependencies
+                return raw_with_metadata.RawWithMetadata(filename)
         else:
             file_type = MediaFile.guess_file_type(filename)
             logging.info("File is of type '%s': %s" % 
@@ -86,6 +94,9 @@ class MediaFile(object):
 
     def get_path(self):
         return self._filename
+
+    def update_path(self, path):
+        self._filename = path
 
     def hash(self, hasher=None, blocksize=65536):
         if self._hash is not None:
