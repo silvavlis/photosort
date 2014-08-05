@@ -8,11 +8,11 @@ __license__ = "GPLv3"
 
 import glob
 import os.path
-from media_with_metadata import MediaWithMetadata
+from mediarich import MediaRich
 import media
 import photo
 
-class MovieWithMetadata(MediaWithMetadata):
+class MovieRich(MediaRich):
 
     def __init__(self, filename):
         media_group_files = glob.glob(os.path.splitext(filename)[0] + ".*")

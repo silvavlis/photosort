@@ -71,11 +71,11 @@ class MediaFile(object):
             logging.info("Backpacked file '%s': %s" % 
                     (sidecar_type, os.path.splitext(filename)[0]))
             if sidecar_type is 'movie_with_metadata':
-                import movie_with_metadata    # delayed import to avoid circular dependencies
-                return movie_with_metadata.MovieWithMetadata(filename)
+                import movierich    # delayed import to avoid circular dependencies
+                return movierich.MovieRich(filename)
             elif sidecar_type is 'raw_with_metadata':
-                import raw_with_metadata    # delayed import to avoid circular dependencies
-                return raw_with_metadata.RawWithMetadata(filename)
+                import rawrich    # delayed import to avoid circular dependencies
+                return rawrich.RawRich(filename)
         else:
             file_type = MediaFile.guess_file_type(filename)
             logging.info("File is of type '%s': %s" % 

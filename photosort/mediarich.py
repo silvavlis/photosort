@@ -12,7 +12,7 @@ import media
 import logging
 import shutil
 
-class MediaWithMetadata(media.MediaFile):
+class MediaRich(media.MediaFile):
 
     def __init__(self, filename):
         pass
@@ -26,7 +26,7 @@ class MediaWithMetadata(media.MediaFile):
             return False
 
         new_media_filename = new_pack_path + os.path.splitext(self._filename)[1]
-        if not super(MediaWithMetadata, self).rename_as(new_media_filename):
+        if not super(MediaRich, self).rename_as(new_media_filename):
             return False
 
         return True
