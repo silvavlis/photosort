@@ -206,7 +206,7 @@ class MediaFile(object):
         logging.info("moving %s to %s" % (self._filename, new_filename))
 
         if self.rename_as(new_filename, file_mode):
-            self._filename = new_filename
+            self.update_path(new_filename)
             return True
         else:
             return False
