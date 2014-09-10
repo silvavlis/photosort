@@ -20,6 +20,39 @@ class MediaRich(media.MediaFile):
     def datetime(self):
         return self.metadata.datetime()
 
+    def get_path(self):
+        raise NotImplementedError, "No path for 'MediaRich', either for media or for metadata"
+
+    def get_filename(self):
+        raise NotImplementedError, "No path for 'MediaRich', either for media or for metadata"
+
+    def get_directory(self):
+        raise NotImplementedError, "No path for 'MediaRich', either for media or for metadata"
+
+    def update_path(self, filename):
+        raise NotImplementedError, "No path for 'MediaRich', either for media or for metadata"
+
+    def hash(self):
+        media_hash = self.media.hash()
+        exif_datetime = self.metadata.exif_datetime()
+
+        if exif_datetime is not None:
+            media_hash += " - " + str(exif_datetime)
+        self._hash = media_hash
+        return media_hash
+
+    def is_equal_to(self,filename):
+        sidecar_type = media.MediaFile.guess_sidecar_file(filename)
+        if sidecar_type and (sidecar_type == self.type()):
+            other_mediarich = media.MediaFile.build_for(filename)
+            same_media = self.media.\
+                    is_equal_to(other_mediarich.media.get_path())
+            same_metadata = self.metadata.\
+                    is_equal_to(other_mediarich.metadata.get_path())
+            return same_media and same_metadata
+        else:
+            return False
+
     def rename_as(self,new_pack_path,file_mode=0o774):
         new_metadata_filename = new_pack_path + os.path.splitext(self._metadata.get_filename())[1]
         if not self._metadata.rename_as(new_metadata_filename, file_mode):
@@ -30,6 +63,9 @@ class MediaRich(media.MediaFile):
             return False
 
         return True
+
+    def calculate_datetime(self,format):
+        return self.metadata.calculate_datetime(format)
 
     def move_to_directory_with_date(self,directory,dir_format,file_format,file_mode=0o774):
         out_dir = directory + "/" + self.calculate_datetime(dir_format)
