@@ -56,7 +56,6 @@ class TestMovieMedia(photosort.test.TestCase):
         self.assertEqual(self.movie.get_filename(),'mov1.mp4')
 
     def test_rename(self):
-
         tmpdir = tempfile.gettempdir()
         tmpfile = tmpdir + '/' + self.movie.get_filename()
         tmpfile_renamed = tmpdir + '/R' + self.movie.get_filename()
