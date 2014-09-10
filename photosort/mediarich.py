@@ -18,7 +18,7 @@ class MediaRich(media.MediaFile):
         pass
 
     def datetime(self):
-        return self._metadata.datetime()
+        return self.metadata.datetime()
 
     def rename_as(self,new_pack_path,file_mode=0o774):
         new_metadata_filename = new_pack_path + os.path.splitext(self._metadata.get_filename())[1]

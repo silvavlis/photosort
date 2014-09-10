@@ -18,7 +18,7 @@ class RawRich(MediaRich):
         media_group_files = glob.glob(os.path.splitext(filename)[0] + ".*")
         for filepath in media_group_files:
             if media.MediaFile.guess_file_type(filepath) == 'raw':
-                media.MediaFile.__init__(self, filepath)
+                self.media = media.MediaFile(filepath)
             elif media.MediaFile.guess_file_type(filepath) == 'photo':
-                self._metadata = photo.Photo(filepath)
+                self.metadata = photo.Photo(filepath)
 
