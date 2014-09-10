@@ -21,4 +21,5 @@ class RawRich(MediaRich):
                 self.media = media.MediaFile(filepath)
             elif media.MediaFile.guess_file_type(filepath) == 'photo':
                 self.metadata = photo.Photo(filepath)
+        self._file_type = "raw_with_metadata"
 
