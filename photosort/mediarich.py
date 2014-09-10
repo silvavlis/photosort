@@ -54,12 +54,12 @@ class MediaRich(media.MediaFile):
             return False
 
     def rename_as(self,new_pack_path,file_mode=0o774):
-        new_metadata_filename = new_pack_path + os.path.splitext(self._metadata.get_filename())[1]
-        if not self._metadata.rename_as(new_metadata_filename, file_mode):
+        new_metadata_filename = new_pack_path + os.path.splitext(self.metadata.get_filename())[1]
+        if not self.metadata.rename_as(new_metadata_filename, file_mode):
             return False
 
-        new_media_filename = new_pack_path + os.path.splitext(self._filename)[1]
-        if not super(MediaRich, self).rename_as(new_media_filename):
+        new_media_filename = new_pack_path + os.path.splitext(self.media.get_path())[1]
+        if not self.media.rename_as(new_media_filename, file_mode):
             return False
 
         return True
@@ -67,7 +67,7 @@ class MediaRich(media.MediaFile):
     def calculate_datetime(self,format):
         return self.metadata.calculate_datetime(format)
 
-    def move_to_directory_with_date(self,directory,dir_format,file_format,file_mode=0o774):
+    def move_to_directory_with_date(self,directory,dir_format,file_format='',file_mode=0o774):
         out_dir = directory + "/" + self.calculate_datetime(dir_format)
 
         try:
@@ -76,15 +76,20 @@ class MediaRich(media.MediaFile):
         except OSError as e:
             pass # it already exists
 
-        new_pack_path = os.path.join(out_dir, self.calculate_datetime(file_format) + os.path.splitext(self.get_filename())[0])
+        if file_format:
+            packname = os.path.join(self.calculate_datetime(file_format) + 
+                    os.path.splitext(self.media.get_filename())[0])
+        else:
+            packname = os.path.splitext(self.media.get_filename())[0]
+        new_pack_path = os.path.join(out_dir, packname)
         logging.info("'media_with_metadata' -> moving %s to %s" % \
-                (os.path.splitext(self.get_path())[0], new_pack_path))
+                (os.path.splitext(self.media.get_path())[0], new_pack_path))
 
         if self.rename_as(new_pack_path, file_mode):
-            self.update_path(new_pack_path + \
-                    os.path.splitext(self.get_filename())[1])
-            self._metadata.update_path(new_pack_path + \
-                    os.path.splitext(self._metadata.get_filename())[1])
+            self.media.update_path(new_pack_path + \
+                    os.path.splitext(self.media.get_filename())[1])
+            self.metadata.update_path(new_pack_path + \
+                    os.path.splitext(self.metadata.get_filename())[1])
             return True
         else:
             return False
