@@ -30,6 +30,10 @@ class MediaFile(object):
         self._hash = None
 
     @staticmethod
+    def guess_sidecar_file(filename):
+        return MediaFile._guess_sidecar_file(filename)
+
+    @staticmethod
     def _guess_sidecar_file(filename):
         media_group_files = glob.glob(os.path.splitext(filename)[0] + ".*")
         if len(media_group_files) < 2:

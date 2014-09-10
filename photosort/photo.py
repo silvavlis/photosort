@@ -39,6 +39,9 @@ class Photo(media.MediaFile):
 
         return self.__exif_data
 
+    def exif_datetime(self):
+        return self._exif_datetime()
+
     def _exif_datetime(self):
         exif_datetime_str = ""
 
