@@ -113,43 +113,6 @@ class TestRichMovieMedia(photosort.test.TestCase):
         expected_filename = os.path.join(tmpdir, '2013', '2013_08_24', '20130824130552_mov1.mp4')
         self.assertEqual(expected_filename, richmovie_t.media.get_path())
         self.assertTrue(self.richmovie1.is_equal_to(expected_filename))
-        return
-
-
-
-
-        mov_mtime = os.path.getmtime(tmpfile)
-        mtime = time.localtime(mov_mtime)
-        year = "%d" % mtime[0]
-        month = "%02d" % mtime[1]
-        day = "%02d" % mtime[2]
-        hour = "%02d" % mtime[3]
-        minute = "%02d" % mtime[4]
-        second = "%02d" % mtime[5]
-        movie_t = media.MediaFile.build_for(tmpfile)
-
-        shutil.rmtree(tmpdir+'/'+year,ignore_errors=True)
-        movie_t.move_to_directory_with_date(tmpdir,dir_fmt)
-
-        expected_filename = os.path.join(tmpdir, year, year+'_'+month+'_'+day, 'mov1.mp4')
-        self.assertTrue(self.movie.is_equal_to(expected_filename))
-
-        shutil.copy(self.movie.get_path(), tmpfile)
-        mov_mtime = os.path.getmtime(tmpfile)
-        mtime = time.localtime(mov_mtime)
-        year = "%d" % mtime[0]
-        month = "%02d" % mtime[1]
-        day = "%02d" % mtime[2]
-        hour = "%02d" % mtime[3]
-        minute = "%02d" % mtime[4]
-        second = "%02d" % mtime[5]
-        movie_t = media.MediaFile.build_for(tmpfile)
-
-        shutil.rmtree(tmpdir+'/'+year,ignore_errors=True)
-        movie_t.move_to_directory_with_date(tmpdir,dir_fmt,file_fmt)
-
-        expected_filename = os.path.join(tmpdir, year, year+'_'+month+'_'+day, year+month+day+hour+minute+second+'_mov1.mp4')
-        self.assertTrue(self.movie.is_equal_to(expected_filename))
 
 if __name__ == '__main__':
     unittest.main()
