@@ -55,7 +55,7 @@ class TestRichMovieMedia(photosort.test.TestCase):
         self.assertFalse(self.richmovie1.is_equal_to(self.m6mv))
         self.assertFalse(self.richmovie1.is_equal_to(self.m6sc))
 
-    def test_datatime_dir(self):
+    def test_datetime_dir(self):
         dir_fmt = '%(year)d/%(year)04d_%(month)02d_%(day)02d'
         dir_str = self.richmovie1.calculate_datetime(dir_fmt)
         self.assertEqual(dir_str,"2013/2013_08_24")
@@ -65,8 +65,7 @@ class TestRichMovieMedia(photosort.test.TestCase):
     def test_get_filename(self):
         self.assertEqual(self.richmovie1.media.get_filename(),'mov1.mp4')
         self.assertEqual(self.richmovie2.metadata.get_filename(),'mov1.jpg')
-        with self.assertRaises(NotImplementedError):
-            self.richmovie2.get_filename()
+        self.assertEqual(self.richmovie1.get_filename(),'mov1.mp4')
 
     def test_rename(self):
         tmpdir = tempfile.gettempdir()

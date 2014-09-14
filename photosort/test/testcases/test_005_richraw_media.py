@@ -55,7 +55,7 @@ class TestRichRawMedia(photosort.test.TestCase):
         self.assertFalse(self.richraw1.is_equal_to(self.m6rw))
         self.assertFalse(self.richraw1.is_equal_to(self.m6sc))
 
-    def test_datatime_dir(self):
+    def test_datetime_dir(self):
         dir_fmt = '%(year)d/%(year)04d_%(month)02d_%(day)02d'
         dir_str = self.richraw1.calculate_datetime(dir_fmt)
         self.assertEqual(dir_str,"2013/2013_08_24")
@@ -65,8 +65,7 @@ class TestRichRawMedia(photosort.test.TestCase):
     def test_get_filename(self):
         self.assertEqual(self.richraw1.media.get_filename(),'raw1.arw')
         self.assertEqual(self.richraw2.metadata.get_filename(),'raw1.jpg')
-        with self.assertRaises(NotImplementedError):
-            self.richraw2.get_filename()
+        self.assertEqual(self.richraw1.get_filename(),'raw1.arw')
 
     def test_rename(self):
         tmpdir = tempfile.gettempdir()

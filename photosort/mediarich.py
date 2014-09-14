@@ -21,13 +21,13 @@ class MediaRich(media.MediaFile):
         return self.metadata.datetime()
 
     def get_path(self):
-        raise NotImplementedError, "No path for 'MediaRich', either for media or for metadata"
+        return self.media.get_path()
 
     def get_filename(self):
-        raise NotImplementedError, "No path for 'MediaRich', either for media or for metadata"
+        return self.media.get_filename()
 
     def get_directory(self):
-        raise NotImplementedError, "No path for 'MediaRich', either for media or for metadata"
+        return self.media.get_directory()
 
     def update_path(self, filename):
         raise NotImplementedError, "No path for 'MediaRich', either for media or for metadata"
