@@ -60,11 +60,11 @@ class MediaFile(object):
     @staticmethod
     def guess_file_type(filename):
         extension = filename.lower().split('.')[-1]
-        if extension in ('jpeg', 'jpg', 'png', 'thm'):
+        if extension in ('jpeg', 'jpg', 'png', 'thm', 'jpg_original', 'gif'):
             return 'photo'
-        elif extension in ('cr2', 'raw', 'arw', 'orf'):
+        elif extension in ('cr2', 'raw', 'arw', 'orf', 'rw2', 'tif'):
             return 'raw'
-        elif extension in ('mpeg', 'mpg', 'mov', 'mp4', 'avi'):
+        elif extension in ('mpeg', 'mpg', 'mov', 'mp4', 'avi', 'mts'):
             return 'movie'
         return 'unknown'
 
