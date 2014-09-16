@@ -61,12 +61,9 @@ class PhotoSort:
         logging.debug("rebuilding the DB")
         walker = walk.WalkForMedia(self._config.output_dir(), ignores=self._inputs)
         for file_dir,file_name in walker.find_media():
-            try:
-                file_path = os.path.join(file_dir, file_name)
-                media_file = media.MediaFile.build_for(file_path)
-                self._photodb.add_to_db(file_dir, file_name, media_file)
-            except:
-                logging.critical("Unexpected error: %s" % (sys.exc_info()[0]))
+            file_path = os.path.join(file_dir, file_name)
+            media_file = media.MediaFile.build_for(file_path)
+            self._photodb.add_to_db(file_dir, file_name, media_file)
 
     def sync(self):
         """
