@@ -7,98 +7,95 @@ __email__ = "miguelangel@ajo.es"
 __copyright__ = "Copyright (C) 2013 Miguel Angel Ajo Pelayo"
 __license__ = "GPLv3"
 
-import csv
+import sqlite3
 import logging
 import os.path
 
 class PhotoDB:
     def __init__(self, config):
-
         self._db_file = config.db_file()
+        if not os.path.isfile(self._db_file):
+            self.initialize()
+        self._dbconn = sqlite3.connect(self._db_file)
+        self._curs = self._dbconn.cursor()
         self._output_dir = config.output_dir()
         self._file_mode = config.output_chmod()
-        self._hashes = {}
-        self.load()
 
-    def load(self, merge=False, filename=None):
-        """
-        loads an existing DB
+    def __del__(self):
+        self._dbconn.commit()
+        self._curs.close()
+        self._dbconn.close()
 
-        If 'merge' is True, the values of previously loaded DBs (if any)
-        are kept.
-        If the path of a file is passed in 'filename', then
-        """
+    def initialize(self):
+        logging.debug("initializing DB %s" %
+                      (self._db_file))
+        tables = [
+            "CREATE TABLE hash (value TEXT PRIMARY KEY ASC);",
+            "CREATE TABLE file_type (type TEXT PRIMARY KEY ASC);",
+            "CREATE TABLE directory (name TEXT PRIMARY KEY ASC);",
+            '''CREATE TABLE file (name TEXT PRIMARY KEY ASC, hash_id INTEGER, 
+                    dir_id INTEGER, type_id INTEGER, 
+                    FOREIGN KEY(hash_id) REFERENCES hash(rowid), 
+                    FOREIGN KEY(dir_id) REFERENCES directory(rowid), 
+                    FOREIGN KEY(type_id) REFERENCES file_type(rowid));'''
+        ]
+        views = [
+            '''CREATE VIEW file_props AS SELECT file.name, directory.name, 
+                    file_type.type, hash.value FROM file 
+                    INNER JOIN directory ON file.dir_id = directory.rowid 
+                    INNER JOIN hash ON file.hash_id = hash.rowid 
+                    INNER JOIN file_type ON file.type_id = file_type.rowid;'''
+        ]
 
-        if filename is None:
-            filename = self._db_file
+        dbconn = sqlite3.connect(self._db_file)
+        curs = dbconn.cursor()
+        for table_spec in tables:
+            curs.execute(table_spec)
+        for view_spec in views:
+            curs.execute(view_spec)
+        dbconn.commit()
+        curs.close()
+        dbconn.close()
 
-        if not merge:
-            self._hashes = {}
+    def _get_id_or_insert(self, table, column, value):
+        insert_stmt = "INSERT INTO {table}({column}) VALUES (:value);".\
+                format(table=table, column=column)
+        select_stmt = "SELECT rowid FROM {table} WHERE {column}=:value;".\
+                format(table=table, column=column) 
         try:
-            logging.info("----------")
-            logging.info("DB Loading %s" % filename)
-            with open(filename, 'r') as f_in:
-                dbreader = csv.reader(f_in, delimiter=',')
-                try:
-                    names = dbreader.next()
-                except StopIteration:
-                    logging.info("DB was empty")
-                    return
-
-                for file_dir, file_name, file_type, hash in dbreader:
-                    self._hashes[hash] = {'dir': file_dir,
-                                              'name': file_name,
-                                              'type': file_type}
-            logging.info("DB Load finished, %d entries" % len(self._hashes))
-        except IOError as e:
-            if e.errno==2:
-                logging.debug("DB file %s doesn't exist " % self._db_file + \
-                    "yet, it will get created")
-            else:
-                logging.error("Error opening DB file %s" % self._db_file)
-                raise
-
-    def write(self):
-
-        try:
-            os.remove(self._db_file+".bak")
-        except:
-            pass
-
-        try:
-            os.rename(self._db_file, self._db_file+".bak",self._file_mode)
-        except:
-            pass
-
-        with open(self._db_file, 'w') as f_out:
-
-            dbwriter = csv.writer(f_out, delimiter=',')
-            dbwriter.writerow(['directory', 'filename', 'type', 'md5'])
-
-            for hash in self._hashes.keys():
-
-                file_dir, file_name, file_type = (
-                    self._hashes[hash]['dir'],
-                    self._hashes[hash]['name'],
-                    self._hashes[hash]['type'])
-
-                dbwriter.writerow([file_dir, file_name, file_type, hash])
+            self._curs.execute(insert_stmt, {"value": value})
+            return self._curs.lastrowid
+        except sqlite3.IntegrityError as e:
+            if str(e).startswith("column ") and str(e).endswith(" is not unique"):
+                self._curs.execute(select_stmt, {"value": value})
+                return self._curs.fetchone()[0]
 
     def add_to_db(self, file_dir, file_name, media_file):
+        logging.debug("adding %s/%s" %
+                      (file_dir, file_name))
+
         try:
             hash = media_file.hash()
         except IOError as e:
             logging.error("IOError %s trying to hash %s" %
                           (e,media_file.get_path()))
             return False
+        hash_id = self._get_id_or_insert("hash", "value", hash)
 
         file_type = media_file.type()
+        type_id = self._get_id_or_insert("file_type", "type", file_type)
 
         # remove output dir path + '/'
         file_dir = file_dir[len(self._output_dir) + 1:]
-        self._hashes[hash] = {'dir': file_dir,
-                              'name': file_name,
-                              'type': file_type}
+        dir_id = self._get_id_or_insert("directory", "name", file_dir)
+
+        self._curs.execute("INSERT INTO file(name, hash_id, type_id, dir_id) " +
+                "VALUES (:filename, :hash_id, :type_id, :dir_id);", \
+                {"filename": file_name, "hash_id": hash_id, \
+                "type_id": type_id, "dir_id": dir_id})
+        file_id = self._curs.lastrowid
+
+        self._dbconn.commit()
 
         logging.info("indexed %s/%s %s %s" % (file_dir,
                                               file_name,
@@ -113,10 +110,18 @@ class PhotoDB:
         """
         hash = media_file.hash()
 
-        if hash in self._hashes:
+        self._curs.execute("SELECT * FROM hash WHERE value=:hash;", {'hash': hash})
+        if self._curs.fetchone():
+            logging.critical("hash of %s: %s" % (media_file.get_path(), hash))
+            self._curs.execute("SELECT * FROM file_props;")
+            file_props = self._curs.fetchone()
+            filename = file_props[0]
+            dirname = file_props[1]
+            file_type = file_props[2]
+            hash_value = file_props[3]
 
-            filename_data = self._hashes[hash]
-            filename2 = self._output_dir + "/" + filename_data['dir']+'/'+filename_data['name']
+            filename2 = os.path.join(self._output_dir, dirname, filename)
+            logging.critical("hash of %s: %s" % (filename2, hash_value))
 
             if not media_file.is_equal_to(filename2):
                 logging.critical("MD5 hash collision for two different files,"

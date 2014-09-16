@@ -51,7 +51,6 @@ class PhotoSort:
                                                      self._file_prefix,
                                                      self._file_mode):
                     self._photodb.add_to_db(media_file.get_directory(), media_file.get_filename(), media_file)
-        self._photodb.write()
 
     def rebuild_db(self):
         """
@@ -67,7 +66,6 @@ class PhotoSort:
                 self._photodb.add_to_db(file_dir, file_name, media_file)
             except:
                 logging.critical("Unexpected error: %s" % (sys.exc_info()[0]))
-        self._photodb.write()
 
     def sync(self):
         """
