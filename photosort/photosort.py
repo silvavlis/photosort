@@ -59,6 +59,7 @@ class PhotoSort:
         target directory to be able to detect duplicates and avoid
         overwritting
         """
+        logging.debug("rebuilding the DB")
         walker = walk.WalkForMedia(self._config.output_dir(), ignores=self._inputs)
         for file_dir,file_name in walker.find_media():
             try:
