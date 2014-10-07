@@ -15,7 +15,7 @@ import shutil
 class MediaRich(media.MediaFile):
 
     def __init__(self, filename):
-        raise NotImplementedError, "No generic 'MediaRich', it should be 'MovieRich', 'RawRich'..."
+        raise NotImplementedError, "No generic 'MediaRich', it should be 'MovieRich'..."
 
     def datetime(self):
         return self.metadata.datetime()

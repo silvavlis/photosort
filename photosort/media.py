@@ -17,9 +17,7 @@ import shutil
 import glob
 
 KnownSidecar = {'movie_with_metadata':
-                        ['movie', 'photo'],
-                'raw_with_metadata':
-                        ['raw', 'photo']
+                        ['movie', 'photo']
                 }
 
 class MediaFile(object):
@@ -77,9 +75,6 @@ class MediaFile(object):
             if sidecar_type is 'movie_with_metadata':
                 import movierich    # delayed import to avoid circular dependencies
                 return movierich.MovieRich(filename)
-            elif sidecar_type is 'raw_with_metadata':
-                import rawrich    # delayed import to avoid circular dependencies
-                return rawrich.RawRich(filename)
         else:
             file_type = MediaFile.guess_file_type(filename)
             logging.info("File is of type '%s': %s" % 
