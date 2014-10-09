@@ -17,7 +17,9 @@ import shutil
 import glob
 
 KnownSidecar = {'movie_with_metadata':
-                        ['movie', 'photo']
+                        ['movie', 'photo'],
+                'audio_with_metadata':
+                        ['audio', 'photo']
                 }
 
 class MediaFile(object):
@@ -64,6 +66,8 @@ class MediaFile(object):
             return 'raw'
         elif extension in ('mpeg', 'mpg', 'mov', 'mp4', 'avi', 'mts'):
             return 'movie'
+        elif extension in ('wav'):
+            return 'audio'
         return 'unknown'
 
     @staticmethod
