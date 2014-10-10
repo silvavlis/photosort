@@ -8,13 +8,19 @@ __license__ = "GPLv3"
 import filecmp
 import hashlib
 import logging
-import os.path
 import os
 import stat
 import sys
 import datetime
 import shutil
 import glob
+if sys.platform == "linux" or sys.platform == "linux2":
+    try:
+        import magic
+        libmagic_available = True
+
+    except ImportError:
+        libmagic_available = False
 
 KnownSidecar = {'movie_with_metadata':
                         ['movie', 'photo'],
@@ -60,13 +66,39 @@ class MediaFile(object):
     @staticmethod
     def guess_file_type(filename):
         extension = filename.lower().split('.')[-1]
+        if libmagic_available:
+            with magic.Magic() as filemagic:
+                file_type = filemagic.id_filename(filename)
+            if file_type.startswith('JPEG image data') or \
+                    file_type.startswith('PNG image data') or \
+                    file_type.startswith('GIF image data'):
+                return 'photo'
+            elif file_type.startswith('Olympus ORF raw image data') or \
+                    file_type.startswith('TIFF image data'):
+                return 'raw'
+            elif file_type.startswith('data'):
+                if extension == 'raw':
+                    return 'raw'
+            elif file_type.startswith('RIFF (little-endian) data, AVI') or \
+                    file_type.startswith('Apple QuickTime movie') or \
+                    file_type.startswith('MPEG sequence, v1'):
+                return 'movie'
+            elif file_type.startswith('ISO Media'):
+                if extension == 'mp4':
+                    return 'movie'
+            elif file_type.startswith('RIFF (little-endian) data, WAV'):
+                return 'audio'
         if extension in ('jpeg', 'jpg', 'png', 'thm', 'jpg_original', 'gif'):
+            logging.debug("PHOTO recognized via extension: %s" % filename)
             return 'photo'
         elif extension in ('cr2', 'raw', 'arw', 'orf', 'rw2', 'tif'):
+            logging.debug("RAW recognized via extension: %s" % filename)
             return 'raw'
         elif extension in ('mpeg', 'mpg', 'mov', 'mp4', 'avi', 'mts'):
+            logging.debug("MOVIE recognized via extension: %s" % filename)
             return 'movie'
         elif extension in ('wav'):
+            logging.debug("AUDIO recognized via extension: %s" % filename)
             return 'audio'
         return 'unknown'
 

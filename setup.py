@@ -2,6 +2,11 @@
 
 import setuptools
 
+install_requires = ['pyaml', 'Pillow']
+import sys
+if sys.platform == "linux" or sys.platform == "linux2":
+    install_requires.append('filemagic')
+
 setuptools.setup(
         name = 'photosort',
         version = '2014.2a',
@@ -16,7 +21,7 @@ setuptools.setup(
             'console_scripts': [
                 'photosort = photosort.photosort:main'
             ]},
-        install_requires = ['pyaml', 'Pillow'],
+        install_requires = install_requires,
         data_files = [('etc', ['etc/photosort.yml'])],
         test_suite = 'photosort.test.testcases'
         )
